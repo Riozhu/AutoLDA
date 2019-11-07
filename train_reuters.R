@@ -9,6 +9,7 @@ library(ModelMetrics)
 
 
 #=============================================================================
+# Set WORKING DIRECTORY to source file location
 # Load Dataset
 #=============================================================================
 current_path = rstudioapi::getActiveDocumentContext()$path 
@@ -115,7 +116,7 @@ topic.list <- get.topics(reuters, topics.of.interest)
 
 
 #=============================================================================
-# CREATE DOCUMENT-TERM MATRIX
+# Creat document term matrix
 ## create a Document-Term Matrix and apply a number of preprocessing transformations
 ## many preprocessing transformations take place by default: 
 ## removing punctuation, lower casing, stripping whitespace

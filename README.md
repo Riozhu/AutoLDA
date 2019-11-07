@@ -18,7 +18,6 @@ The 'reuters' folder contains the reuters dataset. Before you run, please ensure
 Run
 —————————————————————————————————————————————————————————
 The code in auto_LDA.R file is AutoLDA method. You can test it in eitehr train_newsgroup.R or train_reuters.R on the two two datasets. We just provide a toy dataset for each two datasets for evaluation. For further usage, you can just use the function train_Auto_LDA in auto_LDA.R to apply the method.
-
     Notice that since AutoLDA is referred and developed from LDA method and ldatuning packages, you must install packages "tm" and "ldatuning" before you use AutoLDA method.
 
 
