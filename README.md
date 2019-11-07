@@ -1,8 +1,8 @@
-==================================================================
-#AutoLDA 
-##An ensemble method for efficiently selecting 
-##the optimal number of topics in LDA topic models
-==================================================================
+AutoLDA 
+
+An ensemble method for efficiently selecting 
+the optimal number of topics in LDA topic models
+===========================================
 Author: Timothy Graham, Guangnan Zhu, Paul Henman
 Date: August 28th 2019
 
