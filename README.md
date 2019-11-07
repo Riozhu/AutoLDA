@@ -7,7 +7,7 @@ Author: Timothy Graham, Guangnan Zhu, Paul Henman
 Date: August 28th 2019
 
 
-======
+##
 This code was tested to run successfully in Mac OS X Sierra and Nectar Server (Linux).To run the code, there are two approaches and need to set up following dependencies first:
 1. R (version 3.5.0 (2018-04-23). Can be found in https://cran.r-project.org/mirrors.html
 2. R studio(R version 3.5.0 Copyright (C) 2018 The R Foundation for Statistical Computing Platform: x86_64-apple-darwin15.6.0 (64-bit)
