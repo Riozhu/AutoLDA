@@ -1,6 +1,7 @@
 ==================================================================
-###AutoLDA 
-An ensemble method for efficiently selecting the optimal number of topics in LDA topic models
+#AutoLDA 
+##An ensemble method for efficiently selecting 
+##the optimal number of topics in LDA topic models
 ==================================================================
 Author: Timothy Graham, Guangnan Zhu, Paul Henman
 Date: August 28th 2019
@@ -11,17 +12,19 @@ This code was tested to run successfully in Mac OS X Sierra and Nectar Server (L
 2. R studio(R version 3.5.0 Copyright (C) 2018 The R Foundation for Statistical Computing Platform: x86_64-apple-darwin15.6.0 (64-bit)
 Can be found in https://www.rstudio.com/products/RStudio/
 
-The dataset folder contains the Newsgroup dataset. Before you run, please install the R packages in load_dataset.R.
+The 'reuters' folder contains the reuters dataset. Before you run, please ensure you have the R packages in the packages.txt in the library.
 
 ##
 Run
 —————————————————————————————————————————————————————————
-The code in auto_LDA_reuters.R file is AutoLDA method. You can test it in load_dataset.R. Notice that since AutoLDA is developed from LDA method and ldatuning package, you must install packages "tm" and "ldatuning" before you use AutoLDA method.
+The code in auto_LDA.R file is AutoLDA method. You can test it in eitehr train_newsgroup.R or train_reuters.R on the two two datasets. We just provide a toy dataset for each two datasets for evaluation. For further usage, you can just use the function train_Auto_LDA in auto_LDA.R to apply the method.
+
+    Notice that since AutoLDA is referred and developed from LDA method and ldatuning packages, you must install packages "tm" and "ldatuning" before you use AutoLDA method.
 
 
 Known issue
 —————————————————————————————————————————————————————————
 1. Install the packages may have occur some error in namespace. You can just copy
  the error and use stack overflow to check how to fix it. Because we are not sure
- which install may occur error, so in this readme file, we won’t list the errors.
+ which Installation may occur error, so in this readme file, we won’t list the errors.
 2. The execution time could be long. Please just wait for it.
