@@ -201,7 +201,7 @@ colnames(results.table) <- c("Batch","Labeled_K", "New_Method(Min)",
 cat("\n\n===============================================\n")
 
 for (i in 1:length(toy_data)) {
-  cat("Batch: ", i)
+  cat("Batch: ", i, "\n")
   d <- toy_data[[i]]
   k_target <- labeled_y[1]
   # document term matrix of this batch
@@ -216,6 +216,7 @@ for (i in 1:length(toy_data)) {
   Endtime <- Sys.time()
   
   ## Four Measures Result
+  cat("\nThe four metrics:")
   Starttime.Four <- Sys.time()
   topics = seq(2, upper_bound, by=1)
   system.time({

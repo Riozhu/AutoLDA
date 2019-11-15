@@ -44,6 +44,7 @@ colnames(results.table) <- c("Batch", "Labeled_K", "New_Method(Min)",
 
 #======================
 for (i in 1:length(toy_data)) {
+  cat("Batch: ", i, "\n")
   d <- toy_data[[i]][-1]
   
   # Labeled number of topics (labeled k)
@@ -68,6 +69,7 @@ for (i in 1:length(toy_data)) {
   
   ## Four Measures Result
   Starttime.Four <- Sys.time()
+  cat("\nThe four metrics:")
   topics = seq(2, upper_bound, by=1)
   system.time({
     tunes_Four <- FindTopicsNumber(

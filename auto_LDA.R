@@ -50,11 +50,11 @@ auto_lda <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbos
   period = topics[2] - topics[1]
 
   Iter <- Iter + 1
-  
+  cat("\n")
   if(verbose.al.al) {
     cat("Iteration: ", Iter, "\n")
     cat("Measure shows the range is from", min_range, "to", max_range, "\n", sep = " ")
-    cat("The period is", period, "\n", sep = " ")
+    cat("The difference is", period, "\n", sep = " ")
   }
   
   
@@ -63,7 +63,7 @@ auto_lda <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbos
       cat("Warning: Measures disagree each others much. \n")
       cat("THe best number of suggested topic is in the range of", min_range, "and", max_range, "\n",sep = " ")
       cat("The min best K is", min_range, sep = " ")
-      cat("The mean best K is", floor(mean(as.vector(c(min_range,max_range)))), sep = " " )
+      cat("\nThe mean best K is", floor(mean(as.vector(c(min_range,max_range)))), sep = " ")
       result <- c(floor(mean(as.vector(c(min_range,max_range)))),min_range)
       
       
