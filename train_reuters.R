@@ -1,22 +1,23 @@
 # packages
-library(tm)
-library(ldatuning)
-library(quanteda)
-library(rstudioapi)
-library(stringr)
-library(slam)
-library(ModelMetrics)
+library(tm, verbose = FALSE)
+library(ldatuning, verbose = FALSE)
+library(quanteda, quietly = TRUE)
+library(rstudioapi, verbose = FALSE)
+library(stringr, verbose = FALSE)
+library(slam, verbose = FALSE)
+library(ModelMetrics, verbose = FALSE)
 
 
 #=============================================================================
 # Set WORKING DIRECTORY to source file location
 # Load Dataset
 #=============================================================================
-current_path = rstudioapi::getActiveDocumentContext()$path 
+# if you use Rstudio
+# current_path = rstudioapi::getActiveDocumentContext()$path 
 # set current word dictinoary
-setwd(dirname(current_path ))
+# setwd(dirname(current_path ))
 reuters <- read.csv("./reuters/reutersCSV.csv", stringsAsFactors = FALSE)
-
+source("auto_LDA.R")
 #=============================================================================
 # Clean Dataset
 # combine document title & text into single string; extract company tags; clean data
@@ -102,8 +103,7 @@ get.topics <- function(data, topic.list) {
 #=============================================================================
 # Load ground truth labels(topics)
 #=============================================================================
-path <- "./dataset/all-topics-strings.lc.txt"
-print(path)
+path <- "./reuters/all-topics-strings.lc.txt"
 topics.of.interest <- NA
 conn <- file(path,open="r")
 lines <- readLines(conn)
@@ -178,11 +178,13 @@ doc_topic_matrix$id <- id
 
 # Divide the dataset into batches
 data <- split(doc_topic_matrix,cut(doc_topic_matrix$id,seq(0,nrow(doc_topic_matrix),length.out=21)))
+toy_data <- data[[1]]
+toy_data <- split(toy_data,cut(toy_data$id,seq(0,nrow(toy_data),length.out=6)))
 
+# Labeled number of topics (labeled k)
 labeled_y <- NA
-
-for (i in 1:length(data)) {
-  d <- data[[i]]
+for (i in 1:length(toy_data)) {
+  d <- toy_data[[i]]
   d <- d[,-ncol(d)]
   label_k <- length(which(apply(d,2,sum)!=0))
   labeled_y <- c(labeled_y, label_k)
@@ -191,94 +193,100 @@ for (i in 1:length(data)) {
 labeled_y <- labeled_y[-1]
 
 # Results table for record the results
-results.table_reuters <- data.frame(matrix(NA, nrow = 1, ncol = 9))
-colnames(results.table_reuters) <- c("Labeled_K", "New_Method(Min)",
+results.table <- data.frame(matrix(NA, nrow = length(toy_data), ncol = 10))
+colnames(results.table) <- c("Batch","Labeled_K", "New_Method(Min)",
                                      "New_Method(Mean)", "Griffiths2004","CaoJuan2009", "Arun2010", "Deveaud2014", 
                                      "Running_Time_New", "Running_Time_Old")
 
-results.table_reuters$Batch <- c(1:length(labeled_y))
-
-source("auto_LDA.R")
-
-toy_data <- data[[1]]
-
 cat("\n\n===============================================\n")
 
-# Labeled number of topics (labeled k)
-k_target <- labeled_y[1]
-
-dtm <- lda.dtm[toy_data$id,]
-
-# Iteration auto_LDA
-Starttime <- Sys.time()
-topics = seq(2, max_topics, by=50)
-topics <- c(topics, max_topics)
-k_values_my <- train_auto_LDA(dtm, topics, max_topics - 2, verbose.al.lt = TRUE)
-Endtime <- Sys.time()
-
-## train Four Measures separately Result
-Starttime.Four <- Sys.time()
-topics = seq(2, max_topics, by=1)
-system.time({
-  tunes_Four <- FindTopicsNumber(
-    dtm,
-    topics = topics,
-    metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
-    method = "Gibbs",
-    control = list(seed = 77),
-    mc.cores = 4L,
-    verbose = TRUE
-  )
-})
-Endtime.Four <- Sys.time()
-
-Grif <- which.max(tunes_Four$Griffiths2004) + 1
-Deve <- which.max(tunes_Four$Deveaud2014) + 1
-CaoJ <- which.min(tunes_Four$CaoJuan2009) + 1
-Arun <- which.min(tunes_Four$Arun2010) + 1
-
-## 
-cat("\n Calculate Four Measures finished \n")
-
-#K values
-results.table_reuters$Labeled_K[1] <- k_target
-
-k_min <- k_values_my[2]
-k_mean <- k_values_my[1]
-
-results.table_reuters$`New_Method(Min)`[1] <- k_min
-results.table_reuters$`New_Method(Mean)`[1] <- k_mean
-
-
-results.table_reuters$Griffiths2004[1] <- Grif
-results.table_reuters$CaoJuan2009[1] <- CaoJ
-results.table_reuters$Arun2010[1] <- Arun
-results.table_reuters$Deveaud2014[1] <- Deve
-
-#Running Time
-results.table_reuters$Running_Time_New[1] <- difftime(Endtime, Starttime, units='mins')
-results.table_reuters$Running_Time_Old[1] <- difftime(Endtime.Four, Starttime.Four, units='mins')
-
-cat("===============================================\n")
-
+for (i in 1:length(toy_data)) {
+  cat("Batch: ", i)
+  d <- toy_data[[i]]
+  k_target <- labeled_y[1]
+  # document term matrix of this batch
+  dtm <- lda.dtm[d$id,]
+  
+  # Iteration LDA
+  Starttime <- Sys.time()
+  upper_bound <- length(dtm$dimnames$Terms)
+  topics = seq.default(from = 2, to = upper_bound, by = 50)
+  topics = c(topics, upper_bound)
+  k_values_my <- train_Auto_LDA(dtm, topics, (upper_bound - 2), verbose.al.lt = TRUE)
+  Endtime <- Sys.time()
+  
+  ## Four Measures Result
+  Starttime.Four <- Sys.time()
+  topics = seq(2, upper_bound, by=1)
+  system.time({
+    tunes_Four <- FindTopicsNumber(
+      dtm,
+      topics = topics,
+      metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
+      method = "Gibbs",
+      control = list(seed = 77),
+      mc.cores = 4L,
+      verbose = TRUE
+    )
+  })
+  Endtime.Four <- Sys.time()
+  
+  Grif <- which.max(tunes_Four$Griffiths2004) + 1
+  Deve <- which.max(tunes_Four$Deveaud2014) + 1
+  
+  CaoJ <- which.min(tunes_Four$CaoJuan2009) + 1
+  Arun <- which.min(tunes_Four$Arun2010) + 1
+  
+  # 
+  
+  #K values
+  results.table$Labeled_K[i] <- k_target
+  results.table$`New_Method(Min)`[i] <- k_values_my[2]
+  results.table$`New_Method(Mean)`[i] <- k_values_my[1]
+  results.table$Griffiths2004[i] <- Grif
+  results.table$CaoJuan2009[i] <- CaoJ
+  results.table$Arun2010[i] <- Arun
+  results.table$Deveaud2014[i] <- Deve
+  
+  #Running Time
+  # difftime(timeEnd, timeStart, units='mins')
+  results.table$Running_Time_New[i] <- difftime(Endtime, Starttime, units='mins')
+  results.table$Running_Time_Old[i] <- difftime(Endtime.Four, Starttime.Four, units='mins')
+  results.table$Running_Time_New[i] <- round(as.numeric(results.table$Running_Time_New[i]), 2)
+  results.table$Running_Time_Old[i] <- round(as.numeric(results.table$Running_Time_Old[i]), 2)
+  
+  cat("Batch ", i, " is finished.\n\n", sep = "")
+  cat("===============================================\n")
+  
+  
+} 
+# Rstuio
+# View(results.table) 
+# Command Line
+print(results.table)
+# save table
+write.csv(results.table, "./results/result_reuters.csv")
 
 #=============================================================================
 # Evaluation
 #=============================================================================
-evaluation_tbl <- data.frame(matrix(NA, ncol = 7, nrow = 2))
+evaluation_tbl <- data.frame(matrix(NA, ncol = 6, nrow = 1))
 results.table_evaluation <- results.table[,1:(ncol(results.table)-2)]
 
 
 # Calculate the MAE for differnt methods
-for(i in 2:ncol(results.table_evaluation)) {
+for(i in 3:ncol(results.table_evaluation)) {
   mae_error <- mae(results.table_evaluation$Labeled_K, results.table_evaluation[,i])
-  evaluation_tbl[1, i] <- mae_error
+  evaluation_tbl[1, i-2] <- mae_error
 }
-colnames(evaluation_tbl) <- c("Label K", "New_Method(min)","New_Method(mean)","Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014")
+colnames(evaluation_tbl) <- c("New_Method(min)","New_Method(mean)","Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014")
 
-evaluation_tbl$`Label K` <- results.table$Labeled_K
-
-View(evaluation_tbl)
+# Rstudio
+# View(evaluation_tbl)
+# Command Line
+print(evaluation_tbl)
+# save table
+write.csv(evaluation_tbl, "./results/evaluation_reuters.csv")
 
 ## Qualitative Inspection of Learned Representations on LDA model using the k we obtain from autoLDA
 lda.model <- LDA(dtm, k = results.table$`New_Method(min)`, control = list(seed=seedNum))
@@ -286,4 +294,4 @@ beta_lda <- tidy(lda.model, matrix = "beta")
 dff <- tidy(lda.model, matrix = "gamma")
 ldaOut <- as.matrix(terms(lda.model, 20))
 ldaOut.topics <- as.matrix(topicmodels::topics(lda.model))
-
+print(ldaOut.topics)

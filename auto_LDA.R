@@ -1,16 +1,10 @@
-library(tm)
-library(ldatuning)
+train_Auto_LDA <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbose.al.al = TRUE, verbose.al.lt = FALSE) {
 
-train_auto_LDA <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbose.al.al = TRUE, verbose.al.lt = FALSE) {
   Iter <- 0
   startTime <- Sys.time()
-  
   k.train <- auto_lda(dtm, topics, range.topics, seed, mc.cores, verbose.al.al, verbose.al.lt, Iter)
-  
   endTime <- Sys.time()
-  
   time.diff <- difftime(endTime, startTime, units='mins')
-  
   cat("Time Running:", time.diff, "\n\n", sep = " ")
   
   return(k.train)
@@ -54,7 +48,7 @@ auto_lda <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbos
   }
   
   period = topics[2] - topics[1]
-  
+
   Iter <- Iter + 1
   
   if(verbose.al.al) {
@@ -68,7 +62,6 @@ auto_lda <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbos
     if(max_range - min_range > 20) {
       cat("Warning: Measures disagree each others much. \n")
       cat("THe best number of suggested topic is in the range of", min_range, "and", max_range, "\n",sep = " ")
-
       cat("The min best K is", min_range, sep = " ")
       cat("The mean best K is", floor(mean(as.vector(c(min_range,max_range)))), sep = " " )
       result <- c(floor(mean(as.vector(c(min_range,max_range)))),min_range)
@@ -167,3 +160,7 @@ auto_lda <- function(dtm, topics, range.topics, seed = 77, mc.cores = 4L, verbos
 
   return(result)
 }
+
+
+
+
